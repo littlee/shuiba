@@ -1,14 +1,17 @@
 package com.shuiba.sb.shuiba;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class ParentFragment extends ListFragment{
@@ -32,6 +35,11 @@ public class ParentFragment extends ListFragment{
         inflater.inflate(R.menu.fragment_parent_list, menu);
     }
 
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Intent i = new Intent(getActivity(), RecordActivity.class);
+        startActivity(i);
+    }
 
     private class StoryAdapter extends ArrayAdapter<String> {
         public StoryAdapter(String[] Story) {
