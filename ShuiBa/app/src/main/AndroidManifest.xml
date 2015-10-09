@@ -24,6 +24,17 @@
         <activity android:name=".ParentActivity">
 
         </activity>
+
+        <activity android:name=".RecordActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ParentActivity"/>
+        </activity>
+
+        <activity android:name=".PlayActivity"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity android:name=".RecordingActivity"></activity>
     </application>
 
 </manifest>
