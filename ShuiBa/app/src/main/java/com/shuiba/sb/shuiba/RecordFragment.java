@@ -1,6 +1,8 @@
 package com.shuiba.sb.shuiba;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
@@ -30,6 +32,7 @@ public class RecordFragment extends ListFragment{
         ArrayAdapter<Story> adapter =
                 new ArrayAdapter<Story>(getActivity(), android.R.layout.simple_list_item_1,mStories);
         setListAdapter(adapter);
+
     }
 
     @Override
