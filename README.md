@@ -1,5 +1,2 @@
-﻿# 睡吧
-jinson
-yudi
-edit
-zuxin
+# 睡吧
+git config --global credential.helper wincred
