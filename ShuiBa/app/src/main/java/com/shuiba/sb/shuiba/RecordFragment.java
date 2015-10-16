@@ -19,16 +19,16 @@ import java.util.ArrayList;
  * Created by Administrator on 2015/9/24.
  */
 public class RecordFragment extends ListFragment{
+    public static final String EXTRA_STORY_TITLE = "storytitle";
     private ArrayList<Story> mStories = new ArrayList<Story>();
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().setTitle("庙的故事");
-        mStories.add(new Story("从前有座山"));
-        mStories.add(new Story("山上有座庙"));
-        mStories.add(new Story("庙里有个和尚"));
+        String currentTitle = getActivity().getIntent().getStringExtra(EXTRA_STORY_TITLE);
+        getActivity().setTitle(currentTitle);
+
         ArrayAdapter<Story> adapter =
                 new ArrayAdapter<Story>(getActivity(), android.R.layout.simple_list_item_1,mStories);
         setListAdapter(adapter);

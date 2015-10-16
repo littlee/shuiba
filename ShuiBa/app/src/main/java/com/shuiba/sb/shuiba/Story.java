@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class Story {
     private  String mTitle;
-    
+
 
     public String getmTitle() {
         return mTitle;
@@ -45,8 +45,10 @@ public class Story {
         ArrayList<String> titles = new ArrayList<String>();
         String line;
         try {
+            int i = 1;
             while ((line = bufferedReader.readLine()) != null) {
-                titles.add(line);
+                titles.add(i + "." + line);
+                i++;
             }
         } catch (IOException e){
             e.printStackTrace();

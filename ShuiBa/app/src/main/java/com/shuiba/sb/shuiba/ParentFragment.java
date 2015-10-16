@@ -28,6 +28,7 @@ import java.util.ArrayList;
 public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
 
+
     String[] mStories = {"", "",""};
 
     @Override
@@ -35,12 +36,9 @@ public class ParentFragment extends ListFragment{
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
 
-        File file = Environment.getDataDirectory();
-        String name = file.getName();
-        Log.i("ParentFragment", name);
 
         getActivity().setTitle("故事录制");
-        StoryAdapter adapter = new StoryAdapter(new Story().getStoryTitle(getActivity()));
+        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1,new Story().getStoryTitle(getActivity()));
         setListAdapter(adapter);
     }
 
@@ -109,10 +107,11 @@ public class ParentFragment extends ListFragment{
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), RecordActivity.class);
-        startActivity(i);
+        i.putExtra(RecordFragment.EXTRA_STORY_TITLE, ((ArrayAdapter<String>) getListAdapter()).getItem(position));
+                startActivity(i);
     }
 
-    private class StoryAdapter extends ArrayAdapter<String> {
+    /*private class StoryAdapter extends ArrayAdapter<String> {
         public StoryAdapter(ArrayList<String> Story) {
 
             super(getActivity(), 0, Story);
@@ -129,6 +128,6 @@ public class ParentFragment extends ListFragment{
 
             return convertView;
         }
-    }
+    }*/
 
 }
