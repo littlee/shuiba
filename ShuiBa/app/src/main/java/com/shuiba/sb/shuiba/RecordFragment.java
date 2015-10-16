@@ -45,6 +45,12 @@ public class RecordFragment extends ListFragment{
     }
 
     @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Intent i = new Intent(getActivity(), RecordingActivity.class);
+        startActivity(i);
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         getActivity().getMenuInflater().inflate(R.menu.record_list_item_context, menu);
     }
@@ -59,7 +65,7 @@ public class RecordFragment extends ListFragment{
             case R.id.menu_item_retake:
                 startActivity(new Intent(getActivity(), RecordingActivity.class));
                 return true;
-        }
-        return super.onContextItemSelected(item);
+        }        return super.onContextItemSelected(item);
+
     }
 }

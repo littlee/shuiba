@@ -32,9 +32,16 @@
 
         <activity android:name=".PlayActivity"
             android:screenOrientation="landscape">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ChildrenActivity"/>
         </activity>
 
-        <activity android:name=".RecordingActivity"></activity>
+        <activity android:name=".RecordingActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".RecordActivity"/>
+        </activity>
     </application>
 
 </manifest>

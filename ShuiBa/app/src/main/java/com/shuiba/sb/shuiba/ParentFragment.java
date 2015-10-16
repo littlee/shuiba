@@ -1,10 +1,13 @@
 package com.shuiba.sb.shuiba;
 
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -19,21 +22,29 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
 
-    String[] mStories = {" ", " ", " "};
+    String[] mStories = {"", "",""};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
 
+        File file = Environment.getDataDirectory();
+        String name = file.getName();
+        Log.i("ParentFragment", name);
+
         getActivity().setTitle("故事录制");
-        StoryAdapter adapter = new StoryAdapter(mStories);
+        StoryAdapter adapter = new StoryAdapter(new Story().getStoryTitle(getActivity()));
         setListAdapter(adapter);
     }
 
+    @TargetApi(11)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
@@ -47,12 +58,14 @@ public class ParentFragment extends ListFragment{
             listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
                 @Override
                 public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                    
+
                 }
 
                 @Override
                 public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                    return false;
+                    MenuInflater inflater = mode.getMenuInflater();
+                    inflater.inflate(R.menu.storylist_item_context, menu);
+                    return true;
                 }
 
                 @Override
@@ -62,7 +75,15 @@ public class ParentFragment extends ListFragment{
 
                 @Override
                 public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                    return false;
+                    switch (item.getItemId()) {
+                        case R.id.menu_item_delete:
+                            //
+                            mode.finish();
+
+                            return true;
+                        default:
+                            return false;
+                    }
                 }
 
                 @Override
@@ -92,7 +113,7 @@ public class ParentFragment extends ListFragment{
     }
 
     private class StoryAdapter extends ArrayAdapter<String> {
-        public StoryAdapter(String[] Story) {
+        public StoryAdapter(ArrayList<String> Story) {
 
             super(getActivity(), 0, Story);
         }
@@ -104,7 +125,7 @@ public class ParentFragment extends ListFragment{
             }
 
             TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item_textView);
-            titleTextView.setText("从前有座山");
+
 
             return convertView;
         }

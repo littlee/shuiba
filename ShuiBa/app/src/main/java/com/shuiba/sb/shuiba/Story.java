@@ -1,5 +1,14 @@
 package com.shuiba.sb.shuiba;
 
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -7,11 +16,7 @@ import java.util.ArrayList;
  */
 public class Story {
     private  String mTitle;
-
-    public Story(String title){
-        mTitle = title;
-
-    }
+    
 
     public String getmTitle() {
         return mTitle;
@@ -24,5 +29,28 @@ public class Story {
     @Override
     public String toString() {
         return mTitle;
+    }
+
+    public ArrayList<String> getStoryTitle(Context context){
+        InputStream inputStream = context.getResources().openRawResource(R.raw.title);
+
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(inputStream,"GBK");
+        } catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+        }
+
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        ArrayList<String> titles = new ArrayList<String>();
+        String line;
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                titles.add(line);
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return titles;
     }
 }
