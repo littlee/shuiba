@@ -10,6 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Created by Administrator on 2015/9/22.
  */
@@ -21,15 +25,24 @@ public class ChildrenFragment extends ListFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("故事");
+        List<Story> list = new DataProvider().getStories(getActivity().getFilesDir().getPath());
+
+        List<String> titles = new ArrayList<String>();
+        Iterator<Story> it = list.iterator();
+        while(it.hasNext()) {
+            titles.add(it.next().getName());
+        }
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,new Story().getStoryTitle(getActivity()));
+                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,titles);
         setListAdapter(adapter);
+
+
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), PlayActivity.class);
-        i.putExtra(RecordingFragment.EXTRA_RECORDEDSTORY_TITLE,
+        i.putExtra(RecordingFragment.EXTRA_RECORDING_STORY_TITLE,
                 ((ArrayAdapter<String>)getListAdapter()).getItem(position));
         startActivity(i);
     }

@@ -1,9 +1,14 @@
 package com.shuiba.sb.shuiba;
 
+import android.support.annotation.Nullable;
+
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,25 +16,22 @@ import java.util.List;
  * Created by Lee on 2015/10/18.
  */
 public class DataProvider {
-    private String path = null;
+    private static List<Story> list = null;
 
     public DataProvider() {}
 
-    public DataProvider(String path) {
-        this.path = path;
-    }
-
-    public List<Story> getStories() {
-        List<Story> list = new ArrayList<Story>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(path));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public static List<Story> getStories(String path) {
+        path += "/stories.txt";
+        if (list != null) {
+            return list;
         }
-
+        list = new ArrayList<Story>();
+        InputStreamReader isr = null;
+        BufferedReader br = null;
         String line = null;
         try {
+            isr = new InputStreamReader(new FileInputStream(path), "GBK");
+            br = new BufferedReader(isr);
             line = br.readLine();
             while (line != null) {
                 Story s = new Story();
@@ -39,15 +41,14 @@ public class DataProvider {
                 list.add(s);
                 line = br.readLine();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        }finally {
+            try {
+                if (br != null)
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
