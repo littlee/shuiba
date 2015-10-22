@@ -6,8 +6,7 @@
     <string name="children">儿童</string>
     <string name="search">搜索</string>
     <string name="delete">删除</string>
-    <string name="record">录制/试听</string>
-    <string name="retake">重录</string>
-    <string name="recordonly">录音</string>
+    <string name="record">录制/重录</string>
+    <string name="recordonly">录音/重录</string>
     <string name="auditon">试听</string>
 </resources>

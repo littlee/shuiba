@@ -10,28 +10,44 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Created by Administrator on 2015/9/22.
  */
 public class ChildrenFragment extends ListFragment{
 
-    String[] mStories = {"喜洋洋和灰太狼", "从前有座山，山上有座庙", "白雪公主"};
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("故事");
-        StoryAdapter adapter = new StoryAdapter(mStories);
+        List<Story> list = new DataProvider().getStories(getActivity().getFilesDir().getPath());
+
+        List<String> titles = new ArrayList<String>();
+        Iterator<Story> it = list.iterator();
+        while(it.hasNext()) {
+            titles.add(it.next().getName());
+        }
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,titles);
         setListAdapter(adapter);
+
+
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), PlayActivity.class);
+        i.putExtra(RecordingFragment.EXTRA_RECORDING_STORY_TITLE,
+                ((ArrayAdapter<String>)getListAdapter()).getItem(position));
         startActivity(i);
     }
 
-    private class StoryAdapter extends ArrayAdapter<String> {
+    /*private class StoryAdapter extends ArrayAdapter<String> {
         public StoryAdapter(String[] Story) {
 
             super(getActivity(), 0, Story);
@@ -48,5 +64,5 @@ public class ChildrenFragment extends ListFragment{
 
             return convertView;
         }
-    }
+    }*/
 }
