@@ -1,6 +1,8 @@
 package com.shuiba.sb.shuiba;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
@@ -45,7 +47,16 @@ public class ChildrenFragment extends ListFragment{
 
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
 
+        Resources resources = getActivity().getResources();
+        Drawable drawable = resources.getDrawable(R.drawable.listbg);
+        v.setBackgroundDrawable(drawable);
+
+        return v;
+    }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
