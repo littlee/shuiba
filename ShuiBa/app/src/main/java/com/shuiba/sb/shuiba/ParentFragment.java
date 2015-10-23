@@ -30,9 +30,6 @@ import java.util.List;
 public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
 
-    public static List<Story> list;
-
-    String[] mStories = {"", "",""};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,7 +38,6 @@ public class ParentFragment extends ListFragment{
 
         getActivity().setTitle("故事录制");
 
-        String externalPath = Environment.getExternalStorageDirectory().toString();
 
         /*File file = new File(externalPath + "/" + "files");
 
@@ -50,14 +46,8 @@ public class ParentFragment extends ListFragment{
 
         }*/
 
-
-
-        String fiePath = externalPath + "/files";
-        list = DataProvider.getStories(fiePath);
-
-
         List<String> titles = new ArrayList<String>();
-        Iterator<Story> it = list.iterator();
+        Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
             titles.add(it.next().getName());
         }
