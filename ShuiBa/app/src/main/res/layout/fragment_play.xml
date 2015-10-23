@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/imageview_play"
         android:src="@mipmap/demo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,6 +24,6 @@
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_column="42" />
+            android:layout_column="128" />
     </TableRow>
 </TableLayout>
