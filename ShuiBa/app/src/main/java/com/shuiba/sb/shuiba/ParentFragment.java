@@ -3,6 +3,8 @@ package com.shuiba.sb.shuiba;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,7 +37,6 @@ public class ParentFragment extends ListFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
-
         getActivity().setTitle("故事录制");
 
 
@@ -60,6 +61,9 @@ public class ParentFragment extends ListFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
+        Resources resources = getActivity().getResources();
+        Drawable drawable = resources.getDrawable(R.drawable.listbg);
+        v.setBackgroundDrawable(drawable);
         ListView listView = (ListView)v.findViewById(android.R.id.list);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {

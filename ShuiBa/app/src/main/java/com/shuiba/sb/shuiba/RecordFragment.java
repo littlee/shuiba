@@ -1,6 +1,8 @@
 package com.shuiba.sb.shuiba;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
@@ -31,6 +33,7 @@ public class RecordFragment extends ListFragment{
         super.onCreate(savedInstanceState);
         int currentPosition = getActivity().getIntent().getIntExtra(EXTRA_CURRENT_POSITON, 0);//当默认返回-1时，由导航键返回当前活动出现错误
 //        getActivity().setTitle(currentTitle);
+        getActivity().setTitle("故事分幕");
 
         String filesPath = Environment.getExternalStorageDirectory().toString() + "/files";
         List<Story> list = DataProvider.getStories(filesPath);
@@ -59,6 +62,10 @@ public class RecordFragment extends ListFragment{
         View v = super.onCreateView(inflater, container, savedInstanceState);
         ListView listView = (ListView)v.findViewById(android.R.id.list);
         registerForContextMenu(listView);
+
+        Resources resources = getActivity().getResources();
+        Drawable drawable = resources.getDrawable(R.drawable.storypage);
+        v.setBackgroundDrawable(drawable);
 
         return v;
     }
