@@ -1,0 +1,411 @@
+ MediaPlayer本地播放流程解析（一）
+分类： android系统 2014-08-18 22:35 5468人阅读 评论(3) 收藏 举报
+androidmediaplayer多媒体框架setDataSourceaudio
+应用场景：
+
+[java] view plaincopy
+MediaPlayer mediaPlayer = new MediaPlayer();  
+mediaPlayer.setOnCompletionListener(new OnCompletionListener() {  
+    @Override  
+    public void onCompletion(MediaPlayer mp) {  
+        mediaPlayer.release();  
+        mediaPlayer = null;  
+    }  
+});  
+mediaPlayer.setDataSource(“abc.mp3”);  
+mediaPlayer.prepare();  
+mediaPlayer.start();  
+一、setDataSource
+
+在MediaPlayer.java 中
+[java] view plaincopy在CODE上查看代码片派生到我的代码片
+public void setDataSource(FileDescriptor fd, long offset, long length)  
+    throws IOException, IllegalArgumentException, IllegalStateException {  
+    disableProxyListener();  
+    setDataSource(fd, offset, length);  
+}  
+setDataSource最终调用了native函数：_setDataSource(fd,offset, length);
+
+我们直接跳到JNI层来看它的具体实现
+
+根据JNI相关的知识，在android_media_MediaPlayer.cpp中找到了其实现代码：
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+static void  
+android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)  
+{  
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);  
+    if (mp == NULL ) {  
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);  
+        return;  
+    }  
+  
+    if (fileDescriptor == NULL) {  
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);  
+        return;  
+    }  
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);  
+    ALOGV("setDataSourceFD: fd %d", fd);  
+    process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );  
+}  
+mp为MediaPlayer类型的对象，在JNI层创建，在MediaPlayer.cpp中，一起来看setDataSource的实现。
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)  
+{  
+    status_t err = UNKNOWN_ERROR;  
+    const sp<IMediaPlayerService>& service(getMediaPlayerService());  
+    if (service != 0) {  
+        sp<IMediaPlayer> player(service->create(this, mAudioSessionId));  
+        if ((NO_ERROR != doSetRetransmitEndpoint(player)) ||  
+            (NO_ERROR != player->setDataSource(fd, offset, length))) {  
+            player.clear();  
+        }  
+        err = attachNewPlayer(player);  
+    }  
+    return err;  
+}  
+getMediaPlayerService()为一个典型的Binder机制向ServiceManager获取服务的方法，Binder这方面的知识可以参考http://blog.csdn.net/super_dc/article/details/37738123和http://blog.csdn.net/super_dc/article/details/37764947
+
+service->create(this, mAudioSessionId)，先看create方法在IMediaPlayerService.cpp中的实现：
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+virtual sp<IMediaPlayer> create(  
+        const sp<IMediaPlayerClient>& client, int audioSessionId) {  
+    Parcel data, reply;  
+    data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());  
+    data.writeStrongBinder(client->asBinder());  
+    data.writeInt32(audioSessionId);  
+  
+    remote()->transact(CREATE, data, &reply);  
+    return interface_cast<IMediaPlayer>(reply.readStrongBinder());  
+}  
+这里只是Binder客户端的实现，其最终实现会在MediaPlayerService.cpp中由服务端MediaPlayerService来实现。
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+sp<IMediaPlayer> MediaPlayerService::create(const sp<IMediaPlayerClient>& client,  
+        int audioSessionId)  
+{  
+    pid_t pid = IPCThreadState::self()->getCallingPid();  
+    int32_t connId = android_atomic_inc(&mNextConnId);  
+  
+    sp<Client> c = new Client(  
+            this, pid, connId, client, audioSessionId,  
+            IPCThreadState::self()->getCallingUid());  
+  
+    ALOGV("Create new client(%d) from pid %d, uid %d, ", connId, pid,  
+         IPCThreadState::self()->getCallingUid());  
+    /* add by Gary. start {{----------------------------------- */  
+    c->setScreen(mScreen);  
+    /* add by Gary. end   -----------------------------------}} */  
+    c->setSubGate(mGlobalSubGate);  // 2012-03-12, add the global interfaces to control the subtitle gate  
+  
+    wp<Client> w = c;  
+    {  
+        Mutex::Autolock lock(mLock);  
+        mClients.add(w);  
+    }  
+    return c;  
+}  
+综合上面两点，sp<IMediaPlayer>player(service->create(this, mAudioSessionId));中player实际上是一个Client类型对象的proxy。其具体实现都在Client中实现。
+
+player->setDataSource(fd, offset, length)就可以直接到MediaPlayerService.cpp中的Client类中来看其具体实现了。
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+status_t MediaPlayerService::Client::setDataSource(int fd, int64_t offset, int64_t length)  
+{  
+    struct stat sb;  
+    int ret = fstat(fd, &sb);  
+    if (ret != 0) {  
+        ALOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));  
+        return UNKNOWN_ERROR;  
+    }  
+  
+    if (offset >= sb.st_size) {  
+        ALOGE("offset error");  
+        ::close(fd);  
+        return UNKNOWN_ERROR;  
+    }  
+    if (offset + length > sb.st_size) {  
+        length = sb.st_size - offset;  
+        ALOGV("calculated length = %lld", length);  
+    }  
+    // 关键点1  
+    player_type playerType = MediaPlayerFactory::getPlayerType(this,  
+                                                               fd,  
+                                                               offset,  
+                                                               length);  
+    // 关键点2  
+    sp<MediaPlayerBase> p = setDataSource_pre(playerType);  
+    if (p == NULL) {  
+        return NO_INIT;  
+    }  
+  
+    // now set data source  
+    // 关键点3  
+    setDataSource_post(p, p->setDataSource(fd, offset, length));  
+    return mStatus;  
+}  
+这里有3个关键点，我们分别破解之，先看getPlayerType
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+player_type MediaPlayerFactory::getPlayerType(const sp<IMediaPlayer>& client,  
+                                              int fd,  
+                                              int64_t offset,  
+                                              int64_t length) {  
+    GET_PLAYER_TYPE_IMPL(client, fd, offset, length);  
+}  
+  
+#define GET_PLAYER_TYPE_IMPL(a...)                      \  
+    Mutex::Autolock lock_(&sLock);                      \  
+                                                        \  
+    player_type ret = STAGEFRIGHT_PLAYER;               \  
+    float bestScore = 0.0;                              \  
+                                                        \  
+    for (size_t i = 0; i < sFactoryMap.size(); ++i) {   \  
+                                                        \  
+        IFactory* v = sFactoryMap.valueAt(i);           \  
+        float thisScore;                                \  
+        CHECK(v != NULL);                               \  
+        thisScore = v->scoreFactory(a, bestScore);      \  
+        if (thisScore > bestScore) {                    \  
+            ret = sFactoryMap.keyAt(i);                 \  
+            bestScore = thisScore;                      \  
+        }                                               \  
+    }                                                   \  
+                                                        \  
+    if (0.0 == bestScore) {                             \  
+        ret = getDefaultPlayerType();                   \  
+    }                                                   \  
+                                                        \  
+    return ret;  
+MediaPlayerFactory作为一个工厂类，各种mediaplayer向它注册，并各自实现scoreFactory和createPlayer用来判断当前多媒体文件是否适合用此mediaplayer来播放和创建mediaplayer。在哪儿注册mediaplayer呢？在MediaPlayerService的构造函数中，也就是说当向系统注册MediaPlayerService服务时，就已经注册了一些mediaplayer了。
+
+播放mp3文件时，会创建STAGEFRIGHT_PLAYER，这也是默认的播放器。下面就以STAGEFRIGHT_PLAYER来继续下面的流程。
+
+到目前为止，我们知道playerType返回了STAGEFRIGHT_PLAYER，接着来看关键点2.
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+sp<MediaPlayerBase> MediaPlayerService::Client::setDataSource_pre(  
+        player_type playerType)  
+{  
+    ALOGV("player type = %d", playerType);  
+  
+    // create the right type of player  
+    sp<MediaPlayerBase> p = createPlayer(playerType);  
+    if (p == NULL) {  
+        return p;  
+    }  
+  
+    if (!p->hardwareOutput()) {  
+        mAudioOutput = new AudioOutput(mAudioSessionId);  
+        static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);  
+    }  
+  
+    return p;  
+}  
+根据playerType创建播放器,实际上就是创建StagefrightPlayer
+
+再看关键点3，p->setDataSource(fd,offset, length)实际上就是调用了StagefrightPlayer的setDataSource。看代码：
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+StagefrightPlayer::StagefrightPlayer()  
+    : mPlayer(new AwesomePlayer) {  
+    ALOGV("StagefrightPlayer");  
+  
+    mPlayer->setListener(this);  
+}  
+status_t StagefrightPlayer::setDataSource(int fd, int64_t offset, int64_t length) {  
+    ALOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);  
+    return mPlayer->setDataSource(dup(fd), offset, length);  
+}  
+由代码可知，StagefrightPlayer只是AwesomePlayer的代理类，具体实现还在AwesomePlayer里面。
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+status_t AwesomePlayer::setDataSource(  
+        int fd, int64_t offset, int64_t length) {  
+    Mutex::Autolock autoLock(mLock);  
+  
+    reset_l();  
+  
+    sp<DataSource> dataSource = new FileSource(fd, offset, length);  
+  
+    status_t err = dataSource->initCheck();  
+  
+    if (err != OK) {  
+        return err;  
+    }  
+  
+    mFileSource = dataSource;  
+  
+    {  
+        Mutex::Autolock autoLock(mStatsLock);  
+        mStats.mFd = fd;  
+        mStats.mURI = String8();  
+    }  
+  
+    return setDataSource_l(dataSource);  
+}  
+FileSource类实现了数据读取，播放器调用dataSource->readAt来获取数据，另外，其基类DataSource提供了一些分离器如下。RegisterDefaultSniffers将在AwesomePlayer的构造函数中被调用。
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+// static  
+void DataSource::RegisterDefaultSniffers() {  
+    RegisterSniffer(SniffMPEG4);  
+    RegisterSniffer(SniffMatroska);  
+    RegisterSniffer(SniffOgg);  
+    RegisterSniffer(SniffWAV);  
+    RegisterSniffer(SniffFLAC);  
+    RegisterSniffer(SniffAMR);  
+    RegisterSniffer(SniffMPEG2TS);  
+    RegisterSniffer(SniffMP3);  
+    RegisterSniffer(SniffAAC);  
+    RegisterSniffer(SniffMPEG2PS);  
+    RegisterSniffer(SniffWVM);  
+  
+    char value[PROPERTY_VALUE_MAX];  
+    if (property_get("drm.service.enabled", value, NULL)  
+            && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {  
+        RegisterSniffer(SniffDRM);  
+    }  
+}  
+接着往下看setDataSource_l(dataSource)
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+status_t AwesomePlayer::setDataSource_l(  
+        const sp<DataSource> &dataSource) {  
+  
+    // 对于不同的文件格式会创建不同的MediaExtractor，MP3文件会创建MP3Extractor  
+    // 文件格式靠source->sniff(&tmp, &confidence, &meta)来区分，这个函数会遍历之前通过RegisterSniffer注册的分离器，得到最合适的文件格式  
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);  
+  
+    if (extractor == NULL) {  
+        return UNKNOWN_ERROR;  
+    }  
+  
+    if (extractor->getDrmFlag()) {  
+        checkDrmStatus(dataSource);  
+    }  
+  
+    return setDataSource_l(extractor);  
+}  
+  
+status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {  
+    // Attempt to approximate overall stream bitrate by summing all  
+    // tracks' individual bitrates, if not all of them advertise bitrate,  
+    // we have to fail.  
+  
+    int64_t totalBitRate = 0;  
+  
+    mExtractor = extractor;  
+    for (size_t i = 0; i < extractor->countTracks(); ++i) {  
+        sp<MetaData> meta = extractor->getTrackMetaData(i);  
+  
+        int32_t bitrate;  
+        if (!meta->findInt32(kKeyBitRate, &bitrate)) {  
+            const char *mime;  
+            CHECK(meta->findCString(kKeyMIMEType, &mime));  
+            ALOGV("track of type '%s' does not publish bitrate", mime);  
+  
+            totalBitRate = -1;  
+            break;  
+        }  
+  
+        totalBitRate += bitrate;  
+    }  
+  
+    mBitrate = totalBitRate;  
+  
+    ALOGV("mBitrate = %lld bits/sec", mBitrate);  
+  
+    {  
+        Mutex::Autolock autoLock(mStatsLock);  
+        mStats.mBitrate = mBitrate;  
+        mStats.mTracks.clear();  
+        mStats.mAudioTrackIndex = -1;  
+        mStats.mVideoTrackIndex = -1;  
+    }  
+  
+    bool haveAudio = false;  
+    bool haveVideo = false;  
+    for (size_t i = 0; i < extractor->countTracks(); ++i) {  
+        sp<MetaData> meta = extractor->getTrackMetaData(i);  
+  
+        const char *_mime;  
+        CHECK(meta->findCString(kKeyMIMEType, &_mime));  
+  
+        String8 mime = String8(_mime);  
+  
+        if (!haveVideo && !strncasecmp(mime.string(), "video/", 6)) {  
+            setVideoSource(extractor->getTrack(i));  
+            haveVideo = true;  
+  
+            // Set the presentation/display size  
+            int32_t displayWidth, displayHeight;  
+            bool success = meta->findInt32(kKeyDisplayWidth, &displayWidth);  
+            if (success) {  
+                success = meta->findInt32(kKeyDisplayHeight, &displayHeight);  
+            }  
+            if (success) {  
+                mDisplayWidth = displayWidth;  
+                mDisplayHeight = displayHeight;  
+            }  
+  
+            {  
+                Mutex::Autolock autoLock(mStatsLock);  
+                mStats.mVideoTrackIndex = mStats.mTracks.size();  
+                mStats.mTracks.push();  
+                TrackStat *stat =  
+                    &mStats.mTracks.editItemAt(mStats.mVideoTrackIndex);  
+                stat->mMIME = mime.string();  
+            }  
+        } else if (!haveAudio && !strncasecmp(mime.string(), "audio/", 6)) {  
+            setAudioSource(extractor->getTrack(i));  
+            haveAudio = true;  
+            mActiveAudioTrackIndex = i;  
+  
+            {  
+                Mutex::Autolock autoLock(mStatsLock);  
+                mStats.mAudioTrackIndex = mStats.mTracks.size();  
+                mStats.mTracks.push();  
+                TrackStat *stat =  
+                    &mStats.mTracks.editItemAt(mStats.mAudioTrackIndex);  
+                stat->mMIME = mime.string();  
+            }  
+  
+            if (!strcasecmp(mime.string(), MEDIA_MIMETYPE_AUDIO_VORBIS)) {  
+                // Only do this for vorbis audio, none of the other audio  
+                // formats even support this ringtone specific hack and  
+                // retrieving the metadata on some extractors may turn out  
+                // to be very expensive.  
+                sp<MetaData> fileMeta = extractor->getMetaData();  
+                int32_t loop;  
+                if (fileMeta != NULL  
+                        && fileMeta->findInt32(kKeyAutoLoop, &loop) && loop != 0) {  
+                    modifyFlags(AUTO_LOOPING, SET);  
+                }  
+            }  
+        } else if (!strcasecmp(mime.string(), MEDIA_MIMETYPE_TEXT_3GPP)) {  
+            addTextSource_l(i, extractor->getTrack(i));  
+        }  
+    }  
+  
+    if (!haveAudio && !haveVideo) {  
+        if (mWVMExtractor != NULL) {  
+            return mWVMExtractor->getError();  
+        } else {  
+            return UNKNOWN_ERROR;  
+        }  
+    }  
+  
+    mExtractorFlags = extractor->flags();  
+  
+    return OK;  
+}  
+MediaExtractor涉及到媒体文件格式的很多内容，比如track的构成，有几种track等等，后面再做讲解，这里我们播放的是MP3文件，所以countTracks的值为1，sp<MetaData> meta = extractor->getTrackMetaData(i)中meta的kKeyMIMEType值为"audio/"，将会执行到setAudioSource(extractor->getTrack(i))，再看代码：
+[cpp] view plaincopy在CODE上查看代码片派生到我的代码片
+sp<MediaSource> MP3Extractor::getTrack(size_t index) {  
+    if (mInitCheck != OK || index != 0) {  
+        return NULL;  
+    }  
+    // 返回的是一个MP3Source对象  
+    return new MP3Source(  
+            mMeta, mDataSource, mFirstFramePos, mFixedHeader,  
+            mSeeker);  
+}  
+  
+void AwesomePlayer::setAudioSource(sp<MediaSource> source) {  
+    CHECK(source != NULL);  
+  
+    mAudioTrack = source;  
+}  
+至此，setdatasource就分析完成，下一篇将分析prepare的实现过程。

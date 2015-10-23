@@ -3,6 +3,7 @@ package com.shuiba.sb.shuiba;
 public class Story {
     private String name = null;
     private String sid = null;
+    private String partsName = null;
 
     public Story() {}
 
@@ -25,4 +26,5 @@ public class Story {
     public void setId(String id) {
         this.sid = id;
     }
+
 }

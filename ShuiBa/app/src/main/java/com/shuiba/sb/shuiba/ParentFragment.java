@@ -3,6 +3,8 @@ package com.shuiba.sb.shuiba;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,10 +26,13 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
 
+    public static List<Story> list;
 
     String[] mStories = {"", "",""};
 
@@ -35,10 +40,29 @@ public class ParentFragment extends ListFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
-
-
         getActivity().setTitle("故事录制");
-        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1,new Story().getStoryTitle(getActivity()));
+
+        String externalPath = Environment.getExternalStorageDirectory().toString();
+
+        /*File file = new File(externalPath + "/" + "files");
+
+        if (file.exists()){
+            Log.i("ParentFragment", "文件个数");// 输出/storage/emulated/0
+
+        }*/
+
+
+
+        String fiePath = externalPath + "/files";
+        list = DataProvider.getStories(fiePath);
+
+
+        List<String> titles = new ArrayList<String>();
+        Iterator<Story> it = list.iterator();
+        while(it.hasNext()) {
+            titles.add(it.next().getName());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1,titles);
         setListAdapter(adapter);
     }
 
@@ -47,6 +71,9 @@ public class ParentFragment extends ListFragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
+        Resources resources = getActivity().getResources();
+        Drawable drawable = resources.getDrawable(R.drawable.listbg);
+        v.setBackgroundDrawable(drawable);
         ListView listView = (ListView)v.findViewById(android.R.id.list);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
@@ -107,8 +134,9 @@ public class ParentFragment extends ListFragment{
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), RecordActivity.class);
-        i.putExtra(RecordFragment.EXTRA_STORY_TITLE, ((ArrayAdapter<String>) getListAdapter()).getItem(position));
-                startActivity(i);
+        i.putExtra(RecordFragment.EXTRA_CURRENT_POSITON, position);
+//        i.putExtra(RecordFragment.EXTRA_STORY_TITLE,getListAdapter().getItem(position).)
+        startActivity(i);
     }
 
     /*private class StoryAdapter extends ArrayAdapter<String> {
