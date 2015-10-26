@@ -32,8 +32,7 @@
                 android:value=".ParentActivity"/>
         </activity>
 
-        <activity android:name=".PlayActivity"
-            android:screenOrientation="landscape">
+        <activity android:name=".PlayActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ChildrenActivity"/>

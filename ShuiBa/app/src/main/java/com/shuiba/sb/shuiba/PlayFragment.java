@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,16 +36,21 @@ public class PlayFragment extends Fragment{
 
     private Button mPlayButton = null;
     private MediaPlayer mPlayer = null;
+    private SeekBar mSeekBar = null;
     private ImageView image=null;
     boolean mStarting = true;
 
     String selectedStoryTitle = null;
     String selectedStoryId = null;
 
+    String[] audioFile = null;
     int audioId = 1;
+    int length;
+    private final int MAX = 3000;
 
     private void onPlay(boolean start) {
         if (start) {
+
             startPlaying();
         } else {
             stopPlaying();
@@ -61,11 +67,18 @@ public class PlayFragment extends Fragment{
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    mSeekBar.setProgress(MAX * audioId / 3);
                     Log.i("PlayFragment", mFileName + "/" + audioId + ".3gp");
                     audioId++;
-                    if (audioId < 4){
+                    if (audioId <= length){
                         image.setImageDrawable(Drawable.createFromPath(mFileName + "/" + audioId + ".png"));
                         PlayFragment.this.startPlaying();
+                    } else {
+                        mStarting = true;
+                        mPlayButton.setBackgroundResource(android.R.drawable.ic_media_play);
+                        audioId = 1;
+                        image.setImageDrawable(Drawable.createFromPath(mFileName + "/" + audioId + ".png"));
+                        mSeekBar.setProgress(0);
                     }
                 }
             });
@@ -75,8 +88,10 @@ public class PlayFragment extends Fragment{
     }
 
     private void stopPlaying() {
-        mPlayer.release();
-        mPlayer = null;
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 
     @Override
@@ -101,7 +116,6 @@ public class PlayFragment extends Fragment{
         }
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/files/" + selectedStoryId;
-        Log.i("PlayFragment", mFileName);
     }
 
     @Nullable
@@ -111,34 +125,39 @@ public class PlayFragment extends Fragment{
         image=(ImageView)v.findViewById(R.id.imageview_play);
         image.setImageDrawable(Drawable.createFromPath(mFileName + "/" + "1.png"));
 
+        audioFile = new File(mFileName).list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".3gp");
+            }
+        });
+        Log.i("PlayFragment", audioFile[0]);
+
+
         mPlayButton = (Button)v.findViewById(R.id.playbutton);
+//        mPlayButton.setBackgroundResource(android.R.drawable.ic_media_play);
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //获取音频个数
-                final int length = new File(mFileName).list(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String filename) {
-                        return filename.endsWith(".3gp");
-                    }
-                }).length;
-                Log.i("PlayFragment", "length:" + length);
+                length = audioFile.length;
 
                 //开始播放
                 onPlay(mStarting);
-                Log.i("PlayFragment", "onPlay executed");
                 if (mStarting) {
                     mPlayButton.setBackgroundResource(android.R.drawable.ic_media_pause);
                 } else {
                     mPlayButton.setBackgroundResource(android.R.drawable.ic_media_play);
                 }
-
-//                mStarting = !mStarting;
+                mStarting = !mStarting;
             }
         });
+
+        mSeekBar = (SeekBar)v.findViewById(R.id.play_seekbar);
+        mSeekBar.setMax(MAX);
+
         return v;
     }
-
 //    public  void merge(){
 //        try {
 //
