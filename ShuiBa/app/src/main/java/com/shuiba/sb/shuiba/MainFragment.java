@@ -1,6 +1,7 @@
 package com.shuiba.sb.shuiba;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -18,9 +19,8 @@ import java.util.List;
 public class MainFragment extends Fragment{
     private Button mParentButton;
     private Button mChildrenButton;
-
     public static List<Story> list;
-
+    MediaPlayer mPlayer;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +35,7 @@ public class MainFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         mParentButton = (Button)view.findViewById(R.id.parentButton);
-        mParentButton.setOnClickListener(new View.OnClickListener(){
+        mParentButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
@@ -56,4 +56,25 @@ public class MainFragment extends Fragment{
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mPlayer=new MediaPlayer();
+        mPlayer=MediaPlayer.create(getActivity(),R.raw.bears);
+        mPlayer.start();
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (!mPlayer.isPlaying())
+                    mPlayer.start();
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mPlayer.release();
+        mPlayer=null;
+    }
 }
