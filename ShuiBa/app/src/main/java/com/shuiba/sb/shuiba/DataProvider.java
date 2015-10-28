@@ -30,7 +30,7 @@ public class DataProvider {
         BufferedReader br = null;
         String line = null;
         try {
-            isr = new InputStreamReader(new FileInputStream(path), "GBK");
+            isr = new InputStreamReader(new FileInputStream(path), "utf-8");
             br = new BufferedReader(isr);
             line = br.readLine();
             while (line != null) {
