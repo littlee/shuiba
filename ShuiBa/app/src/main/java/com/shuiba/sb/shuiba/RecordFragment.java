@@ -3,9 +3,11 @@ package com.shuiba.sb.shuiba;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import android.widget.ListView;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -26,8 +29,13 @@ import java.util.List;
 public class RecordFragment extends ListFragment{
     public static final String EXTRA_CURRENT_POSITON = "currentposition";
     public static final String EXTRA_STORY_TITLE = "storytitle";
-
+    int length;static boolean flag=false;
     String storyAbsolutePath = null;
+    String selectedStoryTitle = null;
+    String selectedStoryId = null;
+    static String mFileName = null;
+    MediaPlayer mediaPlayer;
+    int audioId = 1;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +59,17 @@ public class RecordFragment extends ListFragment{
             }
         });
 
+       length=partsOfStory.length;
+        String[] playerOfStory = file.list(new FilenameFilter() {
 
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".3gp");
+            }
+        });
+       if(length==playerOfStory.length){
+           flag=true;
+       }
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,partsOfStory);
         setListAdapter(adapter);
@@ -98,6 +116,30 @@ public class RecordFragment extends ListFragment{
         }        return super.onContextItemSelected(item);
 
     }
+    public void startPlaying() {
+
+        try {
+
+            mediaPlayer = new MediaPlayer();
+            Log.d("RecordFragment", mFileName);
+            mediaPlayer.setDataSource(mFileName + "/" + audioId + ".3gp");
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    audioId++;
+                    if (audioId <= length) {
+                        RecordFragment.this.startPlaying();
+                    } else {
+                        audioId = 1;
+                    }
+                }
+            });
+        } catch (IOException e) {
+
+        }
+    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
@@ -108,6 +150,27 @@ public class RecordFragment extends ListFragment{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        switch (item.getItemId()){
+            case R.id.listen:
+                if(flag==true){
+                    selectedStoryTitle = getActivity().getIntent().getStringExtra(RecordFragment.EXTRA_STORY_TITLE);
+                    for (int i = 0; i < MainFragment.list.size(); i++) {
+                        Story story = MainFragment.list.get(i);
+                        if (story.getName().equals(selectedStoryTitle)) {
+                            selectedStoryId = story.getId();
+                            break;
+                        }
+                    }
+                    mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+                    mFileName += "/files/" + selectedStoryId;
+//                    Log.d("RecordFragment", "hhhhhhhhhhhhhh");
+                    RecordFragment.this.startPlaying();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
+
 }
