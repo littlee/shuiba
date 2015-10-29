@@ -1,1 +1,1 @@
-include ':app', ':audioconcatenate'
+include ':app'

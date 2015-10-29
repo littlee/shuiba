@@ -34,15 +34,18 @@ public class ChildrenFragment extends ListFragment{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("故事");
-        List<Story> list = new DataProvider().getStories(getActivity().getFilesDir().getPath());
+//        List<Story> list = new DataProvider().getStories(getActivity().getFilesDir().getPath());
 
         List<String> titles = new ArrayList<String>();
-        Iterator<Story> it = list.iterator();
+        Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
-            titles.add(it.next().getName());
+            Story story = it.next();
+            //如果已经录制好则添加标题
+//            if (story.isDone())
+            titles.add(story.getName());
         }
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,titles);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, titles);
         setListAdapter(adapter);
 
     }
@@ -68,19 +71,18 @@ public class ChildrenFragment extends ListFragment{
     }
 
     /*private class StoryAdapter extends ArrayAdapter<String> {
-        public StoryAdapter(String[] Story) {
-
-            super(getActivity(), 0, Story);
+        public StoryAdapter(List<String> storyTitle) {
+            super(getActivity(), 0, storyTitle);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_story, null);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_stroy_children, null);
             }
 
-            TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item_textView);
-            titleTextView.setText("hhhhhhh");
+            TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item__children_textView);
+            titleTextView.setTextSize(24);
 
             return convertView;
         }

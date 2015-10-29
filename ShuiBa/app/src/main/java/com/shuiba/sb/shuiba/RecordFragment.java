@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -28,18 +29,21 @@ public class RecordFragment extends ListFragment{
     public static final String EXTRA_STORY_TITLE = "storytitle";
 
     String storyAbsolutePath = null;
+    String storyPath = null;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int currentPosition = getActivity().getIntent().getIntExtra(EXTRA_CURRENT_POSITON, 0);//当默认返回-1时，由导航键返回当前活动出现错误
-//        getActivity().setTitle(currentTitle);
-        getActivity().setTitle("故事分幕");
+        //获取故事标题
+        String selectedStoryTitle = getActivity().getIntent().getStringExtra(EXTRA_STORY_TITLE);
+        getActivity().setTitle(selectedStoryTitle);
 
-        String filesPath = Environment.getExternalStorageDirectory().toString() + "/files";
-        List<Story> list = DataProvider.getStories(filesPath);
-        String storyPath = list.get(currentPosition).getId();
 
-        storyAbsolutePath = filesPath + "/" + storyPath;
+        //获取故事素材文件夹
+        storyPath = MainFragment.list.get(currentPosition).getId();
+
+        //故事素材文件夹路径
+        storyAbsolutePath = MainFragment.filesPath + "/" + storyPath;
 
         File file = new File(storyAbsolutePath);
         String[] partsOfStory = file.list(new FilenameFilter() {
@@ -49,7 +53,7 @@ public class RecordFragment extends ListFragment{
                 return filename.endsWith(".png");
             }
         });
-
+        Arrays.sort(partsOfStory);
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,partsOfStory);
@@ -73,9 +77,11 @@ public class RecordFragment extends ListFragment{
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(),RecordingActivity.class);
+        //传递故事标题
         i.putExtra(RecordingFragment.EXTRA_RECORDING_STORY_TITLE,
                 getListAdapter().getItem(position).toString());
         i.putExtra(RecordingFragment.EXTRA_STORY_ABSOLUTE_PATH, storyAbsolutePath);
+        i.putExtra(RecordingFragment.EXTRA_STORY_ID, storyPath);
         startActivity(i);
     }
 

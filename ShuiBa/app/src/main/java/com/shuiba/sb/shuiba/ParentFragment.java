@@ -21,10 +21,12 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,27 +34,25 @@ import java.util.List;
 public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
 
+    public CheckBox mCheckBox;
 
+
+    private StoryAdapter adapter = null;
+    int numberOfAudio;
+    int numberOfMaterial;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
         getActivity().setTitle("故事录制");
 
-
-        /*File file = new File(externalPath + "/" + "files");
-
-        if (file.exists()){
-            Log.i("ParentFragment", "文件个数");// 输出/storage/emulated/0
-
-        }*/
-
         List<String> titles = new ArrayList<String>();
         Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
             titles.add(it.next().getName());
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(),android.R.layout.simple_list_item_1,titles);
+
+        adapter = new StoryAdapter(titles);
         setListAdapter(adapter);
     }
 
@@ -125,14 +125,14 @@ public class ParentFragment extends ListFragment{
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), RecordActivity.class);
         i.putExtra(RecordFragment.EXTRA_CURRENT_POSITON, position);
-//        i.putExtra(RecordFragment.EXTRA_STORY_TITLE,getListAdapter().getItem(position).)
+        i.putExtra(RecordFragment.EXTRA_STORY_TITLE, ((ArrayAdapter<String>) getListAdapter()).getItem(position));
         startActivity(i);
     }
 
-    /*private class StoryAdapter extends ArrayAdapter<String> {
-        public StoryAdapter(ArrayList<String> Story) {
+    private class StoryAdapter extends ArrayAdapter<String> {
+        public StoryAdapter(List<String> storyTitle) {
 
-            super(getActivity(), 0, Story);
+            super(getActivity(), 0, storyTitle);
         }
 
         @Override
@@ -141,11 +141,36 @@ public class ParentFragment extends ListFragment{
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_story, null);
             }
 
+            String storyTitle = getItem(position);
             TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item_textView);
+            titleTextView.setText(storyTitle);
 
+            mCheckBox = (CheckBox)convertView.findViewById(R.id.story_list_item_checkbox);
+            String storyMaterialPath = MainFragment.filesPath + "/" + MainFragment.list.get(position).getId();
+            File file = new File(storyMaterialPath);
+            numberOfAudio = file.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String filename) {
+                    return filename.endsWith(".3gp");
+                }
+            }).length;
+            numberOfMaterial = file.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String filename) {
+                    return filename.endsWith(".png");
+                }
+            }).length;
+            if (numberOfAudio == numberOfMaterial) {
+                mCheckBox.setChecked(true);
+            }
 
             return convertView;
         }
-    }*/
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        adapter.notifyDataSetChanged();
+    }
 }

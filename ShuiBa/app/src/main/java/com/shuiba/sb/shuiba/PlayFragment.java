@@ -67,7 +67,7 @@ public class PlayFragment extends Fragment{
             mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    mSeekBar.setProgress(MAX * audioId / 3);
+                    mSeekBar.setProgress(MAX * audioId / length);
                     Log.i("PlayFragment", mFileName + "/" + audioId + ".3gp");
                     audioId++;
                     if (audioId <= length){
@@ -107,6 +107,7 @@ public class PlayFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         selectedStoryTitle = getActivity().getIntent().getStringExtra(PlayFragment.EXTRA_PLAY_STORY_TITLE);
+        getActivity().setTitle(selectedStoryTitle);
         for (int i = 0; i < MainFragment.list.size(); i++) {
             Story story = MainFragment.list.get(i);
             if (story.getName().equals(selectedStoryTitle)) {
@@ -155,10 +156,17 @@ public class PlayFragment extends Fragment{
 
         mSeekBar = (SeekBar)v.findViewById(R.id.play_seekbar);
         mSeekBar.setMax(MAX);
+        mSeekBar.setEnabled(false);
 
         return v;
     }
-//    public  void merge(){
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mPlayButton.setBackgroundResource(android.R.drawable.ic_media_play);
+    }
+    //    public  void merge(){
 //        try {
 //
 //            String storyPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/files/001";

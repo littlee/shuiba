@@ -2,7 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/layoutbackground">
+    android:background="@drawable/layoutbackground"
+   >
+
 
     <TextView
         android:id="@+id/textview"
@@ -21,6 +23,7 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/textview"
         android:layout_marginTop="80dp"/>
+
 
     <Button
         android:id="@+id/childButton"

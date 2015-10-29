@@ -1,6 +1,7 @@
 package com.shuiba.sb.shuiba;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -30,7 +31,7 @@ public class DataProvider {
         BufferedReader br = null;
         String line = null;
         try {
-            isr = new InputStreamReader(new FileInputStream(path), "GBK");
+            isr = new InputStreamReader(new FileInputStream(path), "utf-8");
             br = new BufferedReader(isr);
             line = br.readLine();
             while (line != null) {
@@ -38,6 +39,7 @@ public class DataProvider {
                 String[] info = line.split(" ");
                 s.setName(info[0]);
                 s.setId(info[1]);
+                s.setDone(Boolean.parseBoolean(info[2]));
                 list.add(s);
                 line = br.readLine();
             }
