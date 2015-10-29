@@ -121,7 +121,7 @@ public class ParentFragment extends ListFragment{
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), RecordActivity.class);
         i.putExtra(RecordFragment.EXTRA_CURRENT_POSITON, position);
-//        i.putExtra(RecordFragment.EXTRA_STORY_TITLE,getListAdapter().getItem(position).)
+        i.putExtra(RecordFragment.EXTRA_STORY_TITLE,((ArrayAdapter<String>)getListAdapter()).getItem(position));
         startActivity(i);
     }
 
