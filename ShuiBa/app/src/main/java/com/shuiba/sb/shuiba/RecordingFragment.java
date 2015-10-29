@@ -4,10 +4,12 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -62,6 +64,7 @@ public class RecordingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         recordedTitle = getActivity().getIntent().getStringExtra(EXTRA_RECORDING_STORY_TITLE);
 
         //获取传递过来的故事素材文件夹路径
@@ -74,6 +77,8 @@ public class RecordingFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+
         View v = inflater.inflate(R.layout.fragment_recording, container, false);
 
         ImageView imageView = (ImageView)v.findViewById(R.id.pic_imageview);
@@ -180,5 +185,6 @@ public class RecordingFragment extends Fragment {
             mediaPlayer = null;
         }
     }
+
 
 }

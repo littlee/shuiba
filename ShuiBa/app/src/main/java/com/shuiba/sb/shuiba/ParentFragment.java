@@ -7,9 +7,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -27,6 +25,10 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+>>>>>>> 33af7c4a94dd5813a72b39171d1fc33e8908dd2c
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -125,7 +127,7 @@ public class ParentFragment extends ListFragment{
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent i = new Intent(getActivity(), RecordActivity.class);
         i.putExtra(RecordFragment.EXTRA_CURRENT_POSITON, position);
-        i.putExtra(RecordFragment.EXTRA_STORY_TITLE, ((ArrayAdapter<String>) getListAdapter()).getItem(position));
+        i.putExtra(RecordFragment.EXTRA_STORY_TITLE,((ArrayAdapter<String>)getListAdapter()).getItem(position));
         startActivity(i);
     }
 
