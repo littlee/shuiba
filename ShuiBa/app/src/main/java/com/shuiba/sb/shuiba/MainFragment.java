@@ -19,14 +19,16 @@ import java.util.List;
 public class MainFragment extends Fragment{
     private Button mParentButton;
     private Button mChildrenButton;
+
     public static List<Story> list;
+    public static String filesPath = null;
     MediaPlayer mPlayer;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String externalPath = Environment.getExternalStorageDirectory().toString();
-        String filePath = externalPath + "/files";
-        list = DataProvider.getStories(filePath);
+        filesPath = externalPath + "/files";
+        list = DataProvider.getStories(filesPath);
     }
 
     @Nullable

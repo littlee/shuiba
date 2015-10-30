@@ -21,6 +21,7 @@ import android.widget.ListView;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,6 +60,7 @@ public class RecordFragment extends ListFragment{
             }
         });
 
+        Arrays.sort(partsOfStory);
        length=partsOfStory.length;
         String[] playerOfStory = file.list(new FilenameFilter() {
 
@@ -163,7 +165,6 @@ public class RecordFragment extends ListFragment{
                     }
                     mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
                     mFileName += "/files/" + selectedStoryId;
-//                    Log.d("RecordFragment", "hhhhhhhhhhhhhh");
                     RecordFragment.this.startPlaying();
                 }
                 return true;
@@ -173,4 +174,13 @@ public class RecordFragment extends ListFragment{
 
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null){
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+    }
 }
