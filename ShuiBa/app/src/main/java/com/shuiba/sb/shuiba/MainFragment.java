@@ -23,6 +23,7 @@ public class MainFragment extends Fragment{
     public static List<Story> list;
     public static String filesPath = null;
     MediaPlayer mPlayer;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

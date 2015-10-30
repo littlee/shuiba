@@ -1,6 +1,5 @@
 package com.shuiba.sb.shuiba;
 
-
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -18,12 +17,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+
+import android.widget.Button;
+
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
 import java.io.FilenameFilter;
+
+import android.widget.ListView;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +38,7 @@ public class ParentFragment extends ListFragment{
     private TextView mTitleTextView;
     public CheckBox mCheckBox;
 
+    public CheckBox mCheckBox;
 
     private StoryAdapter adapter = null;
     int numberOfAudio;
@@ -43,14 +50,13 @@ public class ParentFragment extends ListFragment{
         setHasOptionsMenu(true);//通知FragmentManager:ParentFragment需接收选项菜单方法回调
         getActivity().setTitle("故事录制");
 
-
         List<String> titles = new ArrayList<String>();
         Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
             titles.add(it.next().getName());
         }
         adapter = new StoryAdapter(titles);
-        setListAdapter(adapter);;
+        setListAdapter(adapter);
     }
 
     @TargetApi(11)
@@ -170,5 +176,4 @@ public class ParentFragment extends ListFragment{
         super.onStart();
         adapter.notifyDataSetChanged();
     }
-
 }

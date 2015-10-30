@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 
 /**
@@ -23,6 +25,7 @@ import java.io.IOException;
 public class RecordingFragment extends Fragment {
     public final static String EXTRA_RECORDING_STORY_TITLE = "recordingstorytitle";
     public final static String EXTRA_STORY_ABSOLUTE_PATH = "storyabsolutepath";
+    public final static String EXTRA_STORY_ID = "storyID";
 
     String recordedTitle = null;
     String storyAbsolutePath_Recording = null;
@@ -30,18 +33,46 @@ public class RecordingFragment extends Fragment {
     MediaPlayer mediaPlayer = null;
     String mFilename = null;
 
+    String storyID = null;
+
     Button recordButton = null;
     private boolean mStartRecording = true;
     private boolean mStartAudition = true;
+
+    public void isAuidoDone() {
+        File file = new File(storyAbsolutePath_Recording);
+        int numberOfAudio = file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".3gp");
+            }
+        }).length;
+        int numberOfMaterial = file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".png");
+            }
+        }).length;
+        if (numberOfAudio == numberOfMaterial) {
+            for(int i = 0; i < MainFragment.list.size(); i++){
+                if (MainFragment.list.get(i).getId().equals(storyID))
+                    MainFragment.list.get(i).setDone(true);
+            }
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         recordedTitle = getActivity().getIntent().getStringExtra(EXTRA_RECORDING_STORY_TITLE);
+
+        //获取传递过来的故事素材文件夹路径
         storyAbsolutePath_Recording = getActivity().getIntent().getStringExtra(EXTRA_STORY_ABSOLUTE_PATH);
         getActivity().setTitle(recordedTitle);
         mFilename = storyAbsolutePath_Recording + "/" + recordedTitle.substring(0, recordedTitle.indexOf(".")) + ".3gp";
+
+        storyID = getActivity().getIntent().getStringExtra(EXTRA_STORY_ID);
     }
 
     @Override
@@ -105,6 +136,9 @@ public class RecordingFragment extends Fragment {
         mediaRecorder.stop();
         mediaRecorder.release();
         mediaRecorder = null;
+
+        isAuidoDone();
+
     }
 
     private void onRecord(boolean start) {
