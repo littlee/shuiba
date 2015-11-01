@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,7 +31,7 @@ public class RecordFragment extends ListFragment{
     public static final String EXTRA_STORY_TITLE = "storytitle";
     int partsOfStoryNumber;
     int audioOfStoryNumber;
-    static boolean flag;
+    boolean flag;
     String storyAbsolutePath = null;
     String storyPath = null;
     String selectedStoryTitle = null;
