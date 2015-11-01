@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +27,7 @@ public class MainFragment extends Fragment{
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setTitle("角色选取");
         String externalPath = Environment.getExternalStorageDirectory().toString();
         filesPath = externalPath + "/files";
         list = DataProvider.getStories(filesPath);
@@ -38,7 +38,6 @@ public class MainFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-
         mParentButton = (Button)view.findViewById(R.id.parentButton);
         mParentButton.setOnClickListener(new View.OnClickListener() {
 
@@ -65,7 +64,7 @@ public class MainFragment extends Fragment{
     public void onStart() {
         super.onStart();
         mPlayer=new MediaPlayer();
-        mPlayer=MediaPlayer.create(getActivity(),R.raw.bears);
+        mPlayer=MediaPlayer.create(getActivity(),R.raw.dang);
         mPlayer.start();
         mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
