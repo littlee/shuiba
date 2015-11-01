@@ -29,8 +29,10 @@ public class MainFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         String externalPath = Environment.getExternalStorageDirectory().toString();
+        Log.i("MainFragment", externalPath);
         filesPath = externalPath + "/files";
         list = DataProvider.getStories(filesPath);
+
 
     }
 

@@ -27,6 +27,7 @@ public class RecordingFragment extends Fragment {
     public final static String EXTRA_RECORDING_STORY_TITLE = "recordingstorytitle";
     public final static String EXTRA_STORY_ABSOLUTE_PATH = "storyabsolutepath";
     public final static String EXTRA_STORY_ID = "storyID";
+    public final static String EXTRA_PIC_ID = "picID";
 
     String recordedTitle = null;
     String storyAbsolutePath_Recording = null;
@@ -41,7 +42,19 @@ public class RecordingFragment extends Fragment {
     private boolean mStartRecording = true;
     private boolean mStartAudition = true;
 
-    public void isAuidoDone() {
+    private static int picId;
+
+    public static RecordingFragment newInstance(int picId) {
+        RecordingFragment.picId = picId + 1;
+        Bundle args = new Bundle();
+        args.putInt(EXTRA_PIC_ID, RecordingFragment.picId);
+
+        RecordingFragment fragment = new RecordingFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /*public void isAuidoDone() {
         File file = new File(storyAbsolutePath_Recording);
         int numberOfAudio = file.list(new FilenameFilter() {
             @Override
@@ -61,7 +74,7 @@ public class RecordingFragment extends Fragment {
                     MainFragment.list.get(i).setDone(true);
             }
         }
-    }
+    }*/
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +85,9 @@ public class RecordingFragment extends Fragment {
         //获取传递过来的故事素材文件夹路径
         storyAbsolutePath_Recording = getActivity().getIntent().getStringExtra(EXTRA_STORY_ABSOLUTE_PATH);
         getActivity().setTitle(recordedTitle);
-        mFilename = storyAbsolutePath_Recording + "/" + recordedTitle.substring(0, recordedTitle.indexOf(".")) + ".3gp";
+//        mFilename = storyAbsolutePath_Recording + "/" + recordedTitle.substring(0, recordedTitle.indexOf(".")) + ".3gp";
+        picId = getArguments().getInt(EXTRA_PIC_ID);
+        mFilename = storyAbsolutePath_Recording + "/" + picId + ".3gp";
 
         storyID = getActivity().getIntent().getStringExtra(EXTRA_STORY_ID);
     }
@@ -80,11 +95,11 @@ public class RecordingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-
         View v = inflater.inflate(R.layout.fragment_recording, container, false);
 
         ImageView imageView = (ImageView)v.findViewById(R.id.pic_imageview);
-        String picPath = storyAbsolutePath_Recording + "/" + recordedTitle ;
+//        String picPath = storyAbsolutePath_Recording + "/" + recordedTitle ;
+        String picPath = storyAbsolutePath_Recording + "/" + picId + ".png";
         imageView.setImageDrawable(Drawable.createFromPath(picPath));
 
         recordButton = (Button)v.findViewById(R.id.retake);
@@ -146,8 +161,7 @@ public class RecordingFragment extends Fragment {
         mediaRecorder = null;
         auditionButton.setEnabled(true);
         //判断全文是否录制完成，然后根据结果作标识
-        isAuidoDone();
-
+//        isAuidoDone();
     }
 
     private void onRecord(boolean start) {
@@ -204,8 +218,8 @@ public class RecordingFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         if (!new File(mFilename).exists()) {
             auditionButton.setEnabled(false);
         }

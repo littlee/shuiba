@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +31,11 @@ public class ChildrenFragment extends ListFragment{
         Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
             Story story = it.next();
+            String filePath = Environment.getExternalStorageDirectory().toString() + "/files/" + story.getId();
             //如果已经录制好则添加标题
-//            if (story.isDone())
-            titles.add(story.getName());
+            if (Story.getNumOfMaterialorAudio(filePath,".png") == Story.getNumOfMaterialorAudio(filePath, ".3gp")) {
+                titles.add(story.getName());
+            }
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, titles);

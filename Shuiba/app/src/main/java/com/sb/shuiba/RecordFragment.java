@@ -7,8 +7,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +21,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Administrator on 2015/9/24.
@@ -55,7 +52,7 @@ public class RecordFragment extends ListFragment{
         getActivity().setTitle(selectedStoryTitle);
 
 
-        //获取故事素材文件夹
+        //获取故事素材文件夹名
         storyPath = MainFragment.list.get(currentPosition).getId();
 
         //故事素材文件夹路径
@@ -105,33 +102,18 @@ public class RecordFragment extends ListFragment{
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent i = new Intent(getActivity(),RecordingActivity.class);
+        Intent i = new Intent(getActivity(),RecordingViewPagerActivity.class);
         //传递故事标题
         i.putExtra(RecordingFragment.EXTRA_RECORDING_STORY_TITLE,
                 getListAdapter().getItem(position).toString());
+        //故事素材文件夹路径
         i.putExtra(RecordingFragment.EXTRA_STORY_ABSOLUTE_PATH, storyAbsolutePath);
+        //故事素材文件夹名
         i.putExtra(RecordingFragment.EXTRA_STORY_ID, storyPath);
+
         startActivity(i);
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        getActivity().getMenuInflater().inflate(R.menu.record_list_item_context, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_item_recordoraudition:
-                startActivity(new Intent(getActivity(), RecordingActivity.class));
-                return true;
-
-            case R.id.menu_item_retake:
-                startActivity(new Intent(getActivity(), RecordingActivity.class));
-                return true;
-        }
-        return super.onContextItemSelected(item);
-    }
     public void startPlaying() {
 
         try {

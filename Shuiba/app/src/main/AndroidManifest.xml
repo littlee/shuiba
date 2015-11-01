@@ -22,7 +22,7 @@
         <activity android:name=".ChildrenActivity"></activity>
         <activity android:name=".ParentActivity"></activity>
         <activity android:name=".RecordActivity"></activity>
-        <activity android:name=".RecordingActivity"></activity>
+        <activity android:name=".RecordingViewPagerActivity"></activity>
         <activity android:name=".PlayActivity"></activity>
     </application>
 

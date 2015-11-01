@@ -1,4 +1,8 @@
 package com.sb.shuiba;
+
+import java.io.File;
+import java.io.FilenameFilter;
+
 public class Story {
     private String name = null;
     private String sid = null;
@@ -34,4 +38,20 @@ public class Story {
     public void setDone(boolean done) {
         this.done = done;
     }
+
+    public static int getNumOfMaterialorAudio(String filePath, final String suffix) {
+        int number = 0;
+        File file = new File(filePath);
+        String[] listedFiles = file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(suffix);
+            }
+        });
+        if (listedFiles != null) {
+            number = listedFiles.length;
+        }
+        return number;
+    }
+
 }

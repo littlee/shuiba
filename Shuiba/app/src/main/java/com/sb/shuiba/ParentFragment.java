@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.ActionMode;
@@ -51,6 +52,9 @@ public class ParentFragment extends ListFragment{
         getActivity().setTitle("故事录制");
 
         List<String> titles = new ArrayList<String>();
+        if (MainFragment.list == null) {
+            MainFragment.list = DataProvider.getStories(Environment.getExternalStorageDirectory().toString() + "/files");
+        }
         Iterator<Story> it = MainFragment.list.iterator();
         while(it.hasNext()) {
             titles.add(it.next().getName());
@@ -150,19 +154,30 @@ public class ParentFragment extends ListFragment{
 
             mCheckBox = (CheckBox)convertView.findViewById(R.id.story_list_item_checkbox);
             String storyMaterialPath = MainFragment.filesPath + "/" + MainFragment.list.get(position).getId();
-            File file = new File(storyMaterialPath);
-            numberOfAudio = file.list(new FilenameFilter() {
+//            File file = new File(storyMaterialPath);
+            /*String[] picFiles = file.list(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String filename) {
                     return filename.endsWith(".3gp");
                 }
-            }).length;
-            numberOfMaterial = file.list(new FilenameFilter() {
+            });
+            if (picFiles != null) {
+                numberOfAudio = picFiles.length;
+            }*/
+           /* numberOfAudio = file.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String filename) {
+                    return filename.endsWith(".3gp");
+                }
+            }).length;*/
+            numberOfAudio = Story.getNumOfMaterialorAudio(storyMaterialPath , ".3gp");
+            /*numberOfMaterial = file.list(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String filename) {
                     return filename.endsWith(".png");
                 }
-            }).length;
+            }).length;*/
+            numberOfMaterial = Story.getNumOfMaterialorAudio(storyMaterialPath, ".png");
             if (numberOfAudio == numberOfMaterial) {
                 mCheckBox.setChecked(true);
             }
@@ -172,8 +187,11 @@ public class ParentFragment extends ListFragment{
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         adapter.notifyDataSetChanged();
+        if (MainFragment.list == null) {
+            MainFragment.list = DataProvider.getStories(Environment.getExternalStorageDirectory().toString() + "/files");
+        }
     }
 }
