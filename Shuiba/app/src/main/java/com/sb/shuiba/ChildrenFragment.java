@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,8 +39,7 @@ public class ChildrenFragment extends ListFragment{
             }
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, titles);
-        setListAdapter(adapter);
+        setListAdapter(new StoryAdapter(titles));
 
     }
 
@@ -63,7 +63,7 @@ public class ChildrenFragment extends ListFragment{
 
     }
 
-    /*private class StoryAdapter extends ArrayAdapter<String> {
+    private class StoryAdapter extends ArrayAdapter<String> {
         public StoryAdapter(List<String> storyTitle) {
             super(getActivity(), 0, storyTitle);
         }
@@ -74,10 +74,11 @@ public class ChildrenFragment extends ListFragment{
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_stroy_children, null);
             }
 
+            String storyTitle = getItem(position);
             TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item__children_textView);
-            titleTextView.setTextSize(24);
+            titleTextView.setText(storyTitle);
 
             return convertView;
         }
-    }*/
+    }
 }

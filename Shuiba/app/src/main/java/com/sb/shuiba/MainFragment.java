@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +29,7 @@ public class MainFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle("角色选取");
-        String externalPath = Environment.getExternalStorageDirectory().toString();
-        Log.i("MainFragment", externalPath);
+        String externalPath = Environment.getExternalStorageDirectory().getPath();
         filesPath = externalPath + "/files";
         list = DataProvider.getStories(filesPath);
 

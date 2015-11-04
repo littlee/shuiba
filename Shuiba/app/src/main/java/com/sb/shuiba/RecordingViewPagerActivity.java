@@ -12,6 +12,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -31,6 +32,7 @@ public class RecordingViewPagerActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewpager_recording);
+
         storyMaterialPath = getIntent().getStringExtra(RecordingFragment.EXTRA_STORY_ABSOLUTE_PATH);
         String partsOfStoryId = getIntent().getStringExtra(RecordingFragment.EXTRA_RECORDING_STORY_TITLE);
         int currentItem = Integer.parseInt(partsOfStoryId.substring(0, partsOfStoryId.indexOf(".")));
@@ -40,6 +42,7 @@ public class RecordingViewPagerActivity extends FragmentActivity {
                 return filename.endsWith(".png");
             }
         }).length;
+
         mViewPager = (ViewPager)findViewById(R.id.viewpager);
         mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         mViewPager.setPageTransformer(true, new DepthPageTransformer());

@@ -41,7 +41,7 @@ public class RecordFragment extends ListFragment{
     String[] partsOfStory;
     File file;
     static String mFileName = null;
-    MediaPlayer mediaPlayer;
+    MediaPlayer mediaPlayer =null;
     int audioId = 1;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,11 @@ public class RecordFragment extends ListFragment{
 
 
         //获取故事素材文件夹名
+        if (MainFragment.list == null) {
+            String externalPath = Environment.getExternalStorageDirectory().getPath();
+            String filesPath = externalPath + "/files";
+            MainFragment.list = DataProvider.getStories(filesPath);
+        }
         storyPath = MainFragment.list.get(currentPosition).getId();
 
         //故事素材文件夹路径
@@ -67,17 +72,12 @@ public class RecordFragment extends ListFragment{
                 return filename.endsWith(".png");
             }
         });
-        partsOfStoryNumber = partsOfStory.length;//故事素材个数
+        if (partsOfStory != null) {
+            partsOfStoryNumber = partsOfStory.length;//故事素材个数
+        }
         Arrays.sort(partsOfStory);//进行排序
 
-        audioOfStory = file.list(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".3gp");
-            }
-        });
-        audioOfStoryNumber = audioOfStory.length;//素材录音音频个数
+        audioOfStoryNumber = Story.getNumOfMaterialorAudio(storyAbsolutePath, ".3gp");//素材录音音频个数
         //判断是否录制完成  即音频文件和素材文件个数是否相等
         if(partsOfStoryNumber == audioOfStoryNumber){
            flag=true;
@@ -120,6 +120,7 @@ public class RecordFragment extends ListFragment{
         try {
 
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setScreenOnWhilePlaying(true);
             mediaPlayer.setDataSource(mFileName + "/" + audioId + ".3gp");
             mediaPlayer.prepare();
             mediaPlayer.start();
@@ -161,6 +162,7 @@ public class RecordFragment extends ListFragment{
                     mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
                     mFileName += "/files/" + selectedStoryId;
                     RecordFragment.this.startPlaying();
+
                 } else {
                     Toast.makeText(getActivity(), "全文未录制完成！", Toast.LENGTH_SHORT).show();
                 }
@@ -174,21 +176,10 @@ public class RecordFragment extends ListFragment{
     @Override
     public void onStart() {
         super.onStart();
-        partsOfStoryNumber = file.list(new FilenameFilter() {
 
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".png");
-            }
-        }).length;
+        partsOfStoryNumber = Story.getNumOfMaterialorAudio(storyAbsolutePath, ".png");
 
-        audioOfStoryNumber = file.list(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".3gp");
-            }
-        }).length;
+        audioOfStoryNumber = Story.getNumOfMaterialorAudio(storyAbsolutePath, ".3gp");
         if(partsOfStoryNumber == audioOfStoryNumber){
             flag = true;
         } else {

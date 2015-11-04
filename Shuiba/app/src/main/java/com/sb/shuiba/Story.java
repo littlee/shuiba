@@ -6,8 +6,6 @@ import java.io.FilenameFilter;
 public class Story {
     private String name = null;
     private String sid = null;
-    private String partsName = null;
-    private boolean done = false;
 
     public Story() {}
 
@@ -31,13 +29,6 @@ public class Story {
         this.sid = id;
     }
 
-    public Boolean isDone() {
-        return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
 
     public static int getNumOfMaterialorAudio(String filePath, final String suffix) {
         int number = 0;
