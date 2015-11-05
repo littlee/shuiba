@@ -60,7 +60,9 @@ public class PlayFragment extends Fragment{
     private void startPlaying() {
 
         try {
+
             mPlayer = new MediaPlayer();
+            mPlayer.setScreenOnWhilePlaying(true);
             mPlayer.setDataSource(mFileName + "/" + audioId + ".3gp");
             mPlayer.prepare();
             mPlayer.start();
@@ -164,47 +166,5 @@ public class PlayFragment extends Fragment{
         super.onStart();
         mPlayButton.setBackgroundResource(android.R.drawable.ic_media_play);
     }
-    //    public  void merge(){
-//        try {
-//
-//            String storyPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/files/001";
-//            Log.i("PlayFragment", "storyPath");
-//            File file1 = new File(storyPath + "1.3gp");
-//            File file2 = new File(storyPath + "2.3gp");
-//            File file3 = new File(storyPath + "merge.3gp");
-//            Log.i("PlayFragment", "new File has been executed");
-//            FileInputStream fistream1 = new FileInputStream(file1);
-//            FileInputStream fistream2 = new FileInputStream(file2);
-//            Log.i("PlayFragment", "new FileInputStream has been executed");//不能执行
-//            SequenceInputStream sistream = new SequenceInputStream(fistream1, fistream2);
-//            FileOutputStream fostream = new FileOutputStream(file3);
-//
-//            /*String temp;
-//
-//            while( ( temp = new BufferedReader(new InputStreamReader(sistream)).readLine()) != null)
-//            {
-//
-//                new BufferedWriter(new OutputStreamWriter(fostream)).write(temp);
-//            }*/
-//
-//            int count;
-//            byte[] temp = new byte[4096];
-//            while((count = sistream.read(temp)) != -1) {
-//                fostream.write(temp, 0, count);
-//            }
-//
-//
-//            fostream.close();
-//            sistream.close();
-//            fistream1.close();
-//            fistream2.close();
-//        } catch (FileNotFoundException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//    }
 
 }

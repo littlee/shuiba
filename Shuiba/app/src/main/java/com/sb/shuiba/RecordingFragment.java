@@ -44,6 +44,8 @@ public class RecordingFragment extends Fragment {
 
     private static int picId;
 
+    private boolean isCreated = false;
+
     public static RecordingFragment newInstance(int picId) {
         RecordingFragment.picId = picId + 1;
         Bundle args = new Bundle();
@@ -54,31 +56,11 @@ public class RecordingFragment extends Fragment {
         return fragment;
     }
 
-    /*public void isAuidoDone() {
-        File file = new File(storyAbsolutePath_Recording);
-        int numberOfAudio = file.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".3gp");
-            }
-        }).length;
-        int numberOfMaterial = file.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".png");
-            }
-        }).length;
-        if (numberOfAudio == numberOfMaterial) {
-            for(int i = 0; i < MainFragment.list.size(); i++){
-                if (MainFragment.list.get(i).getId().equals(storyID))
-                    MainFragment.list.get(i).setDone(true);
-            }
-        }
-    }*/
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        isCreated = true;
 
         recordedTitle = getActivity().getIntent().getStringExtra(EXTRA_RECORDING_STORY_TITLE);
 
@@ -110,6 +92,7 @@ public class RecordingFragment extends Fragment {
                 onRecord(mStartRecording);
                 if (mStartRecording) {
                     recordButton.setText("停止录音");
+
                 } else {
                     recordButton.setText("录音/重录");
                 }
@@ -160,8 +143,6 @@ public class RecordingFragment extends Fragment {
         mediaRecorder.release();
         mediaRecorder = null;
         auditionButton.setEnabled(true);
-        //判断全文是否录制完成，然后根据结果作标识
-//        isAuidoDone();
     }
 
     private void onRecord(boolean start) {
@@ -175,6 +156,7 @@ public class RecordingFragment extends Fragment {
     private void startPlaying(boolean start) {
         mediaPlayer = new MediaPlayer();
         try {
+            mediaPlayer.setScreenOnWhilePlaying(true);
             mediaPlayer.setDataSource(mFilename);
             mediaPlayer.prepare();
             mediaPlayer.start();
@@ -209,11 +191,16 @@ public class RecordingFragment extends Fragment {
         if (mediaRecorder != null) {
             mediaRecorder.release();
             mediaRecorder = null;
+            recordButton.setText("录音/重录");
+            mStartRecording = !mStartRecording;
         }
 
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+            auditionButton.setText("试听");
+            mStartAudition = !mStartAudition;
+
         }
     }
 
@@ -222,6 +209,22 @@ public class RecordingFragment extends Fragment {
         super.onResume();
         if (!new File(mFilename).exists()) {
             auditionButton.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (!isCreated)
+            return;
+        if (!isVisibleToUser) {
+            if (mediaRecorder != null) {
+                mediaRecorder.release();
+                mediaRecorder = null;
+                mStartRecording = !mStartRecording;
+            }
+            recordButton.setText("录音/重录");
         }
     }
 }

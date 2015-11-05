@@ -39,7 +39,6 @@ public class DataProvider {
                 String[] info = line.split(" ");
                 s.setName(info[0]);
                 s.setId(info[1]);
-                s.setDone(Boolean.parseBoolean(info[2]));
                 list.add(s);
                 line = br.readLine();
             }
