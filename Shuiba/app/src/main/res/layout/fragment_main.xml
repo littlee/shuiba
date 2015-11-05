@@ -1,0 +1,37 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/star"
+   >
+
+
+    <!--<TextView-->
+        <!--android:id="@+id/textview"-->
+        <!--android:text="@string/role_selection"-->
+        <!--android:textSize="30sp"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="15dp"-->
+        <!--android:layout_marginTop="15dp"/>-->
+
+    <Button
+        android:id="@+id/parentButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"/>
+
+
+    <Button
+        android:id="@+id/childButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/children"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/parentButton"
+        android:layout_marginTop="80dp" />
+
+
+</RelativeLayout>
