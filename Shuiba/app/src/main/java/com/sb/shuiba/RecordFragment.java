@@ -7,7 +7,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ListFragment;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -82,10 +82,29 @@ public class RecordFragment extends ListFragment{
         if(partsOfStoryNumber == audioOfStoryNumber){
            flag=true;
         }
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,partsOfStory);
-        setListAdapter(adapter);
+        /*ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1,partsOfStory);*/
+        setListAdapter(new StoryAdapter(partsOfStory));
 
+    }
+
+    private class StoryAdapter extends ArrayAdapter<String> {
+        public StoryAdapter(String[] storyTitle) {
+            super(getActivity(), 0, storyTitle);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item_record_fragment, null);
+            }
+
+            String storyTitle = getItem(position);
+            TextView titleTextView = (TextView)convertView.findViewById(R.id.story_list_item__record_textView);
+            titleTextView.setText("第" + storyTitle.substring(0,storyTitle.indexOf(".")) + "幕");
+
+            return convertView;
+        }
     }
 
     @Override

@@ -7,17 +7,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 
 /**
@@ -59,19 +54,17 @@ public class RecordingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         isCreated = true;
 
         recordedTitle = getActivity().getIntent().getStringExtra(EXTRA_RECORDING_STORY_TITLE);
-
         //获取传递过来的故事素材文件夹路径
         storyAbsolutePath_Recording = getActivity().getIntent().getStringExtra(EXTRA_STORY_ABSOLUTE_PATH);
-        getActivity().setTitle(recordedTitle);
+
 //        mFilename = storyAbsolutePath_Recording + "/" + recordedTitle.substring(0, recordedTitle.indexOf(".")) + ".3gp";
         picId = getArguments().getInt(EXTRA_PIC_ID);
         mFilename = storyAbsolutePath_Recording + "/" + picId + ".3gp";
-
         storyID = getActivity().getIntent().getStringExtra(EXTRA_STORY_ID);
+
     }
 
     @Override
@@ -224,7 +217,6 @@ public class RecordingFragment extends Fragment {
                 mediaRecorder = null;
                 mStartRecording = !mStartRecording;
             }
-            recordButton.setText("录音/重录");
         }
     }
 }
